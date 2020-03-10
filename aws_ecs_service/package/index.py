@@ -1,11 +1,10 @@
 import json
-from typing import Any, Dict
-
 import boto3
 import botocore
 import logging
 
 from botocore.exceptions import ClientError
+from typing import Any, Dict, List
 
 try:
     from aws_ecs_service.package.action import Action
@@ -22,6 +21,16 @@ logger.setLevel(logging.INFO)
 
 logger.info(f'Version of boto3 lib: {boto3.__version__}.')
 logger.info(f'Version of botocore lib: {botocore.__version__}.')
+
+
+def __try_get_key(dictionary: Dict[str, Any], keys: List[str]) -> Any:
+    for key in keys:
+        value = dictionary.get(key)
+
+        if value:
+            return value
+
+    raise KeyError(f'Non of the keys {keys} were found.')
 
 
 def __success(event, context, data):
@@ -57,9 +66,9 @@ def __handle(event, context):
 
     kwargs = event['ResourceProperties']
 
-    create_args = kwargs['onCreate']
-    update_args = kwargs['onUpdate']
-    delete_args = kwargs['onDelete']
+    create_args = __try_get_key(kwargs, ['onCreate', 'OnCreate', 'oncreate', 'on_create'])
+    update_args = __try_get_key(kwargs, ['onUpdate', 'OnUpdate', 'onupdate', 'on_update'])
+    delete_args = __try_get_key(kwargs, ['onDelete', 'OnDelete', 'ondelete', 'on_delete'])
 
     if event['RequestType'] == 'Delete':
         return __delete(**create_args)
