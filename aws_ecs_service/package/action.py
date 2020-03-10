@@ -9,8 +9,6 @@ logger.setLevel(logging.INFO)
 
 
 class Action:
-    ECS_RESOURCE = boto3.resource('ecs')
-
     @staticmethod
     def create(**kwargs) -> Dict[str, Any]:
         """
@@ -29,7 +27,7 @@ class Action:
 
         :return: Response dictionary.
         """
-        response = Action.ECS_RESOURCE.create_service(**kwargs)
+        response = boto3.client('ecs').create_service(**kwargs)
 
         return Action.__default_response(
             cluster=kwargs.get('cluster'),
@@ -59,7 +57,7 @@ class Action:
         :return: Response dictionary.
         """
         try:
-            response = Action.ECS_RESOURCE.update_service(**kwargs)
+            response = boto3.client('ecs').update_service(**kwargs)
         except ClientError as ex:
             if ex.response['Error']['Code'] == 'InvalidParameterException':
                 if 'codedeploy' in ex.response['Error']['Message'].lower():
@@ -75,7 +73,7 @@ class Action:
                         healthCheckGracePeriodSeconds=kwargs.get('healthCheckGracePeriodSeconds'),
                     )
 
-                    response = Action.ECS_RESOURCE.update_service(**kwargs)
+                    response = boto3.client('ecs').update_service(**kwargs)
                 else:
                     raise
             elif ex.response['Error']['Code'] == 'ServiceNotActiveException':
@@ -111,7 +109,7 @@ class Action:
         """
         try:
             logger.info('Making ecs desired count 0...')
-            Action.ECS_RESOURCE.update_service(dict(
+            boto3.client('ecs').update_service(dict(
                 cluster=kwargs.get('cluster'),
                 service=kwargs.get('serviceName'),
                 desiredCount=0,
@@ -123,7 +121,7 @@ class Action:
             )
 
         logger.info('Deleting service...')
-        response = Action.ECS_RESOURCE.delete_service(**kwargs)
+        response = boto3.client('ecs').delete_service(**kwargs)
 
         return Action.__default_response(
             cluster=kwargs.get('cluster'),
@@ -135,7 +133,7 @@ class Action:
     @staticmethod
     def __default_response(cluster: str, service_name: str, success: bool, metadata: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            response = Action.ECS_RESOURCE.describe_services(
+            response = boto3.client('ecs').describe_services(
                 cluster=cluster,
                 services=[service_name],
             )
