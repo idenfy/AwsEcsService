@@ -1,5 +1,8 @@
 # Release history
 
+#### 1.0.5
+Implement a fail-safe for json dumps.
+
 #### 1.0.4
 Human error fix.
 

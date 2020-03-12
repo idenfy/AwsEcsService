@@ -67,7 +67,7 @@ class Response:
             'meta': self.metadata
         }
 
-        response_json_with_meta = json.dumps(response_dict_with_meta)
+        response_json_with_meta = json.dumps(response_dict_with_meta, default=lambda o: '<not serializable>')
         is_too_big = len(response_json_with_meta.encode('utf-8')) >= self.MAXIMUM_RESPONSE_SIZE
         response = response_dict_without_meta if is_too_big else response_dict_with_meta
 

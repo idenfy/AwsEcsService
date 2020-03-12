@@ -13,12 +13,14 @@ def fix_kwargs(func):
         args = list(copy.deepcopy(args))
         kwargs = dict(copy.deepcopy(kwargs))
 
-        logger.info(f'Fixing kwargs... Before: {json.dumps(kwargs)}.')
+        before_json = json.dumps(kwargs, default=lambda o: '<not serializable>')
+        logger.info(f'Fixing kwargs... Before: {before_json}.')
 
         __fix_str_to_int(args)
         __fix_str_to_int(kwargs)
 
-        logger.info(f'Fixing kwargs... After: {json.dumps(kwargs)}.')
+        after_json = json.dumps(kwargs, default=lambda o: '<not serializable>')
+        logger.info(f'Fixing kwargs... After: {after_json}.')
 
         return func(*args, **kwargs)
     return wrapper_fix_kwargs
