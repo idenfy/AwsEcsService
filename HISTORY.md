@@ -1,5 +1,8 @@
 # Release history
 
+#### 1.0.4
+Human error fix.
+
 #### 1.0.3
 Fix kwargs by converting string-integers to integers.
 

@@ -74,23 +74,23 @@ def __handle(event, context) -> Response:
     delete_args = __try_get_key(kwargs, ['onDelete', 'OnDelete', 'ondelete', 'on_delete'])
 
     if event['RequestType'] == 'Delete':
-        return __delete(**create_args)
+        return __delete(**delete_args)
 
     if event['RequestType'] == 'Create':
-        return __create(**update_args)
+        return __create(**create_args)
 
     if event['RequestType'] == 'Update':
-        return __update(**delete_args)
+        return __update(**update_args)
 
     raise KeyError('Unsupported request type! Type: {}'.format(event['RequestType']))
 
 
 def handler(event, context):
     try:
-        response = __handle(event, context)
+        response = __handle(event, context).to_dict()
     except ClientError as ex:
         return __failed(event, context, {'Error': str(ex.response)})
     except Exception as ex:
         return __failed(event, context, {'Error': str(ex)})
 
-    __success(event, context, response.to_dict())
+    __success(event, context, response)

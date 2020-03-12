@@ -1,9 +1,13 @@
+import logging
+
 from typing import Dict, Any
 from aws_cdk.aws_cloudformation import CustomResource, CustomResourceProvider, ICustomResourceProvider
 from aws_cdk.aws_iam import Role, CompositePrincipal, ServicePrincipal, PolicyDocument, PolicyStatement, Effect
 from aws_cdk.aws_lambda import IFunction, Runtime, Code, Function
 from aws_cdk.core import Stack, RemovalPolicy, Duration
 from aws_ecs_service.package import package_root
+
+logr = logging.getLogger(__name__)
 
 
 class EcsService:
@@ -13,6 +17,7 @@ class EcsService:
     Read more about ecs service:
     https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs_services.html
     """
+
     def __init__(
             self,
             scope: Stack,

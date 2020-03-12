@@ -1,19 +1,30 @@
+import copy
+import logging
+import json
+
 from typing import Dict, Any, Union, List, Tuple
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def fix_kwargs(func):
     def wrapper_fix_kwargs(*args, **kwargs):
-        args = list(args)
-        kwargs = dict(kwargs)
+        args = list(copy.deepcopy(args))
+        kwargs = dict(copy.deepcopy(kwargs))
 
-        __to_int(args)
-        __to_int(kwargs)
+        logger.info(f'Fixing kwargs... Before: {json.dumps(kwargs)}.')
 
-        func(*args, **kwargs)
+        __fix_str_to_int(args)
+        __fix_str_to_int(kwargs)
+
+        logger.info(f'Fixing kwargs... After: {json.dumps(kwargs)}.')
+
+        return func(*args, **kwargs)
     return wrapper_fix_kwargs
 
 
-def __to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
+def __fix_str_to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
     """
     Converts strings to ints (if possible).
 
@@ -31,7 +42,7 @@ def __to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
 
                 data[key] = value
             else:
-                __to_int(value)
+                __fix_str_to_int(value)
     if isinstance(data, list):
         for index in range(len(data)):
             if isinstance(data[index], str):
@@ -40,4 +51,4 @@ def __to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
                 except ValueError:
                     pass
             else:
-                __to_int(data[index])
+                __fix_str_to_int(data[index])

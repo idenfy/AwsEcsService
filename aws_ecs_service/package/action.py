@@ -38,6 +38,7 @@ class Action:
 
         :return: Response dictionary.
         """
+        logger.info(f'Calling boto3 ecs client "create_service" with parameters: {kwargs}.')
         response = boto3.client('ecs').create_service(**kwargs)
 
         return Response(
@@ -69,6 +70,7 @@ class Action:
         :return: Response dictionary.
         """
         try:
+            logger.info(f'Calling boto3 ecs client "update_service" with parameters: {kwargs}.')
             response = boto3.client('ecs').update_service(**kwargs)
         except ClientError as ex:
             if ex.response['Error']['Code'] == 'InvalidParameterException':
@@ -85,6 +87,7 @@ class Action:
                         healthCheckGracePeriodSeconds=kwargs.get('healthCheckGracePeriodSeconds'),
                     )
 
+                    logger.info(f'Calling boto3 ecs client "update_service" for CODEDEPLOY with parameters: {kwargs}.')
                     response = boto3.client('ecs').update_service(**kwargs)
                 else:
                     raise
@@ -134,6 +137,7 @@ class Action:
             )
 
         logger.info('Deleting service...')
+        logger.info(f'Calling boto3 ecs client "delete_service" with parameters: {kwargs}.')
         response = boto3.client('ecs').delete_service(**kwargs)
 
         return Response(

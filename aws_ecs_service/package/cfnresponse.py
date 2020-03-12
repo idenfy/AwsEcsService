@@ -5,11 +5,13 @@
 #  This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied.
 #  See the License for the specific language governing permissions and limitations under the License.
 
-from botocore.vendored import requests
 import json
+
+from botocore.vendored import requests
 
 SUCCESS = "SUCCESS"
 FAILED = "FAILED"
+
 
 def send(event, context, responseStatus, responseData, physicalResourceId=None, noEcho=False):
     responseUrl = event['ResponseURL']
@@ -31,8 +33,8 @@ def send(event, context, responseStatus, responseData, physicalResourceId=None, 
     print("Response body:\n" + json_responseBody)
 
     headers = {
-        'content-type' : '',
-        'content-length' : str(len(json_responseBody))
+        'content-type': '',
+        'content-length': str(len(json_responseBody))
     }
 
     try:
