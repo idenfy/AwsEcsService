@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup(
     name='aws_ecs_service',
-    version='1.0.2',
+    version='1.0.3',
     license='GNU GENERAL PUBLIC LICENSE Version 3',
     packages=find_packages(exclude=['venv', 'test']),
     description=(
@@ -22,6 +22,7 @@ setup(
         'aws_cdk.custom_resources',
         'aws_cdk.aws_lambda',
         'aws_cdk.aws_iam',
+        'boto3'
     ],
     author='Laimonas Sutkus',
     author_email='laimonas@idenfy.com, laimonas.sutkus@gmail.com',

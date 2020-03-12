@@ -1,5 +1,8 @@
 # Release history
 
+#### 1.0.3
+Fix kwargs by converting string-integers to integers.
+
 #### 1.0.2
 Mitigate CloudFormation bug.
 

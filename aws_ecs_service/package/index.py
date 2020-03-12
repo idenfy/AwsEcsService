@@ -9,12 +9,15 @@ from typing import Any, Dict, List
 try:
     from aws_ecs_service.package.action import Action
     from aws_ecs_service.package import cfnresponse
+    from aws_ecs_service.package.response import Response
 except ImportError:
     # Lambda specific import.
     # noinspection PyUnresolvedReferences
     import cfnresponse
     # noinspection PyUnresolvedReferences
     from action import Action
+    # noinspection PyUnresolvedReferences
+    from response import Response
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -43,25 +46,25 @@ def __failed(event, context, data):
     cfnresponse.send(event, context, cfnresponse.FAILED, data)
 
 
-def __create(**kwargs) -> Dict[str, Any]:
+def __create(**kwargs) -> Response:
     response = Action.create(**kwargs)
     logger.info(json.dumps(response, default=lambda o: '<not serializable>'))
     return response
 
 
-def __update(**kwargs) -> Dict[str, Any]:
+def __update(**kwargs) -> Response:
     response = Action.update(**kwargs)
     logger.info(json.dumps(response, default=lambda o: '<not serializable>'))
     return response
 
 
-def __delete(**kwargs) -> Dict[str, Any]:
+def __delete(**kwargs) -> Response:
     response = Action.delete(**kwargs)
     logger.info(json.dumps(response, default=lambda o: '<not serializable>'))
     return response
 
 
-def __handle(event, context):
+def __handle(event, context) -> Response:
     logger.info('Got new request. Event: {}, Context: {}'.format(event, context))
 
     kwargs = event['ResourceProperties']
@@ -90,4 +93,4 @@ def handler(event, context):
     except Exception as ex:
         return __failed(event, context, {'Error': str(ex)})
 
-    __success(event, context, response)
+    __success(event, context, response.to_dict())

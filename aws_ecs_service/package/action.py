@@ -1,8 +1,18 @@
 import boto3
 import logging
 
-from typing import Any, Dict
 from botocore.exceptions import ClientError
+
+try:
+    from aws_ecs_service.package.response import Response
+    from aws_ecs_service.package.fix_kwargs import fix_kwargs
+except ImportError:
+    # Lambda specific import.
+    # noinspection PyUnresolvedReferences
+    from response import Response
+    # noinspection PyUnresolvedReferences
+    from fix_kwargs import fix_kwargs
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -10,7 +20,8 @@ logger.setLevel(logging.INFO)
 
 class Action:
     @staticmethod
-    def create(**kwargs) -> Dict[str, Any]:
+    @fix_kwargs
+    def create(**kwargs) -> Response:
         """
         Runs and maintains a desired number of tasks from a specified task definition.
         If the number of tasks running in a service drops below the desiredCount , Amazon ECS runs
@@ -29,7 +40,7 @@ class Action:
         """
         response = boto3.client('ecs').create_service(**kwargs)
 
-        return Action.__default_response(
+        return Response(
             cluster=kwargs.get('cluster'),
             service_name=kwargs.get('serviceName'),
             success=True,
@@ -37,7 +48,8 @@ class Action:
         )
 
     @staticmethod
-    def update(**kwargs) -> Dict[str, Any]:
+    @fix_kwargs
+    def update(**kwargs) -> Response:
         """
         Modifies the parameters of a service.
 
@@ -85,7 +97,7 @@ class Action:
             else:
                 raise
 
-        return Action.__default_response(
+        return Response(
             cluster=kwargs.get('cluster'),
             service_name=kwargs.get('serviceName'),
             success=True,
@@ -93,7 +105,8 @@ class Action:
         )
 
     @staticmethod
-    def delete(**kwargs) -> Dict[str, Any]:
+    @fix_kwargs
+    def delete(**kwargs) -> Response:
         """
         Deletes a specified service within a cluster. You can delete a service if you have no
         running tasks in it and the desired task count is zero. If the service is actively
@@ -109,11 +122,11 @@ class Action:
         """
         try:
             logger.info('Making ecs desired count 0...')
-            boto3.client('ecs').update_service(dict(
+            boto3.client('ecs').update_service(
                 cluster=kwargs.get('cluster'),
                 service=kwargs.get('serviceName'),
                 desiredCount=0,
-            ))
+            )
         except ClientError as ex:
             logger.error(
                 f'Failed to set desired count to 0. Reason: {repr(ex)}, {ex.response}. '
@@ -123,33 +136,9 @@ class Action:
         logger.info('Deleting service...')
         response = boto3.client('ecs').delete_service(**kwargs)
 
-        return Action.__default_response(
+        return Response(
             cluster=kwargs.get('cluster'),
             service_name=kwargs.get('serviceName'),
             success=True,
             metadata=response
         )
-
-    @staticmethod
-    def __default_response(cluster: str, service_name: str, success: bool, metadata: Dict[str, Any]) -> Dict[str, Any]:
-        try:
-            response = boto3.client('ecs').describe_services(
-                cluster=cluster,
-                services=[service_name],
-            )
-        except ClientError:
-            return {
-                'arn': None,
-                'name': None,
-                'success': success,
-                'meta': metadata
-            }
-
-        response = response['services'][0]
-
-        return {
-            'arn': response['serviceArn'],
-            'name': response['serviceName'],
-            'success': success,
-            'meta': metadata
-        }
