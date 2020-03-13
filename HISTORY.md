@@ -1,5 +1,8 @@
 # Release history
 
+#### 1.0.7
+Fix dependencies.
+
 #### 1.0.6
 Various bugs fixed related to custom resource. Added more logging
 for better debugging. Improved kwargs fixer. Improved cfn 
