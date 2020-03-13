@@ -81,7 +81,7 @@ class Action:
                     # need to be updated, a new AWS CodeDeploy deployment should be created.
                     kwargs = dict(
                         cluster=kwargs.get('cluster'),
-                        service=kwargs.get('serviceName'),
+                        service=kwargs.get('service'),
                         desiredCount=kwargs.get('desiredCount'),
                         deploymentConfiguration=kwargs.get('deploymentConfiguration'),
                         healthCheckGracePeriodSeconds=kwargs.get('healthCheckGracePeriodSeconds'),
@@ -102,7 +102,7 @@ class Action:
 
         return Response(
             cluster=kwargs.get('cluster'),
-            service_name=kwargs.get('serviceName'),
+            service_name=kwargs.get('service'),
             success=True,
             metadata=response
         )
@@ -127,7 +127,7 @@ class Action:
             logger.info('Making ecs desired count 0...')
             boto3.client('ecs').update_service(
                 cluster=kwargs.get('cluster'),
-                service=kwargs.get('serviceName'),
+                service=kwargs.get('service'),
                 desiredCount=0,
             )
         except ClientError as ex:
@@ -135,6 +135,8 @@ class Action:
                 f'Failed to set desired count to 0. Reason: {repr(ex)}, {ex.response}. '
                 f'Ignoring exception and trying to delete ecs service anyways.'
             )
+        except Exception as ex:
+            logger.error(f'Unknown error: {repr(ex)}.')
 
         logger.info('Deleting service...')
         logger.info(f'Calling boto3 ecs client "delete_service" with parameters: {kwargs}.')
@@ -142,7 +144,7 @@ class Action:
 
         return Response(
             cluster=kwargs.get('cluster'),
-            service_name=kwargs.get('serviceName'),
+            service_name=kwargs.get('service'),
             success=True,
             metadata=response
         )

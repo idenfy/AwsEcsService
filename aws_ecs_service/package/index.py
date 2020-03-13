@@ -36,14 +36,14 @@ def __try_get_key(dictionary: Dict[str, Any], keys: List[str]) -> Any:
     raise KeyError(f'Non of the keys {keys} were found.')
 
 
-def __success(event, context, data):
+def __success(event, context, data, reason=None):
     logger.info('SUCCESS: {}'.format(data))
-    cfnresponse.send(event, context, cfnresponse.SUCCESS, data)
+    cfnresponse.send(event, context, cfnresponse.SUCCESS, data, reason=reason)
 
 
-def __failed(event, context, data):
+def __failed(event, context, data, reason=None):
     logger.info('FAIL: {}'.format(data))
-    cfnresponse.send(event, context, cfnresponse.FAILED, data)
+    cfnresponse.send(event, context, cfnresponse.FAILED, data, reason=reason)
 
 
 def __create(**kwargs) -> Response:
@@ -89,8 +89,8 @@ def handler(event, context):
     try:
         response = __handle(event, context).to_dict()
     except ClientError as ex:
-        return __failed(event, context, {'Error': str(ex.response)})
+        return __failed(event, context, {'Error': str(ex.response)}, reason=f'{repr(ex)}:{ex.response}')
     except Exception as ex:
-        return __failed(event, context, {'Error': str(ex)})
+        return __failed(event, context, {'Error': str(ex)}, reason=repr(ex))
 
     __success(event, context, response)

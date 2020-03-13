@@ -16,8 +16,8 @@ def fix_kwargs(func):
         before_json = json.dumps(kwargs, default=lambda o: '<not serializable>')
         logger.info(f'Fixing kwargs... Before: {before_json}.')
 
-        __fix_str_to_int(args)
-        __fix_str_to_int(kwargs)
+        __fix(args)
+        __fix(kwargs)
 
         after_json = json.dumps(kwargs, default=lambda o: '<not serializable>')
         logger.info(f'Fixing kwargs... After: {after_json}.')
@@ -26,7 +26,7 @@ def fix_kwargs(func):
     return wrapper_fix_kwargs
 
 
-def __fix_str_to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
+def __fix(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) -> None:
     """
     Converts strings to ints (if possible).
 
@@ -35,22 +35,32 @@ def __fix_str_to_int(data: Union[Tuple[Any, ...], List[Any], Dict[Any, Any]]) ->
     :return: No return.
     """
     if isinstance(data, dict):
-        for key, value in data.items():
-            if isinstance(value, str):
-                try:
-                    value = int(value)
-                except ValueError:
-                    value = value
-
-                data[key] = value
-            else:
-                __fix_str_to_int(value)
+        for key in data.keys():
+            data[key] = try_to_int(data[key])
+            data[key] = try_to_bool(data[key])
+            __fix(data[key])
     if isinstance(data, list):
         for index in range(len(data)):
-            if isinstance(data[index], str):
-                try:
-                    data[index] = int(data[index])
-                except ValueError:
-                    pass
-            else:
-                __fix_str_to_int(data[index])
+            data[index] = try_to_int(data[index])
+            data[index] = try_to_bool(data[index])
+            __fix(data[index])
+
+
+def try_to_int(value: Any) -> Union[Any, int]:
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return value
+
+
+def try_to_bool(value: Any) -> Union[Any, int]:
+    truthy = ['true', 'True', 'TRUE']
+    falsy = ['false', 'False', 'FALSE']
+
+    if value in truthy:
+        return True
+
+    if value in falsy:
+        return False
+
+    return value

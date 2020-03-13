@@ -11,8 +11,6 @@ logger.setLevel(logging.INFO)
 
 
 class Response:
-    MAXIMUM_RESPONSE_SIZE = 1024 * 4
-
     def __init__(self, cluster: str, service_name: str, success: bool, metadata: Dict[str, Any]) -> None:
         self.__cluster = cluster
         self.__service_name = service_name
@@ -53,22 +51,11 @@ class Response:
             return None
 
     def to_dict(self) -> Dict[str, Any]:
-        response_dict_with_meta = {
+        response = {
             'arn': self.service_arn,
             'name': self.service_name,
             'success': self.success,
             'meta': self.metadata
         }
-
-        response_dict_without_meta = {
-            'arn': self.service_arn,
-            'name': self.service_name,
-            'success': self.success,
-            'meta': self.metadata
-        }
-
-        response_json_with_meta = json.dumps(response_dict_with_meta, default=lambda o: '<not serializable>')
-        is_too_big = len(response_json_with_meta.encode('utf-8')) >= self.MAXIMUM_RESPONSE_SIZE
-        response = response_dict_without_meta if is_too_big else response_dict_with_meta
 
         return response
