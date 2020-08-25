@@ -1,5 +1,8 @@
 # Release history
 
+#### 1.2.0
+Dependency update 1.60.0 - 2.0.0.
+
 #### 1.1.0
 Force CDK dependency update to 1.44.0.
 
